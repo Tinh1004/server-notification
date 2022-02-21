@@ -8,6 +8,19 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 var serverKey = require('./privateKey.json') //put the generated private key path here    
 
+const Notification = require('./models/Notification')
+
+const mongoose = require('mongoose');
+
+MONGODB_URL= 'mongodb+srv://learnnodejs:learnnodejslearnnodejslearnnodejs@cluster0.wdwpr.mongodb.net/notification_flutter?retryWrites=true&w=majority';
+mongoose.connect(
+    MONGODB_URL, 
+    { useNewUrlParser: true }
+  )
+  .then((result) => console.log("Connection"))
+  .catch((error) => console.log('Error'));
+
+
 var fcm = new FCM(serverKey);
 app.use(cors());
 app.post("/", function(req, res){
@@ -20,31 +33,68 @@ app.post('/login', (req, res)=>{
     console.log(req.body);
 });
 
-app.post("/notifications" ,(req,res) => {
+app.post("/notifications" , async (req,res) => {
 
-    var message = { 
-        to: req.body.token,
-        // collapse_key: '...',
+    try{
+        var message = { 
+            to: req.body.token,
+            // collapse_key: '...',
+        
+            notification: {
+                title: req.body.title,
+                body: req.body.body
+            },
+        
+            data: {  //you can send only notification or only data(or include both)
+                my_key: 'my value',
+                my_another_key: 'my another value'
+            }
+        }
+        
+        fcm.send(message, function (err, response) {
+            if (err) {
+                console.log("Something has gone wrong!")
+            } else {
+                console.log("Successfully sent with response: ", response)
+            }
+        })
+        
     
-        notification: {
+        const add_notification = new Notification({ 
+            token: req.body.token,
             title: req.body.title,
-            body: req.body.body
-        },
+            content:  req.body.body
+        })
     
-        data: {  //you can send only notification or only data(or include both)
-            my_key: 'my value',
-            my_another_key: 'my another value'
-        }
+        const saveNotification = await add_notification.save();
+        res.send("Send Notifications successfully!!");
+    } catch (e){
+        res.send(e);
     }
-    
-    fcm.send(message, function (err, response) {
-        if (err) {
-            console.log("Something has gone wrong!")
-        } else {
-            console.log("Successfully sent with response: ", response)
-        }
-    })
-    res.send("Send Notifications successfully!!")
+
+})
+
+app.get("/notifications" , async (req,res) => {
+
+    try{
+        const notifications = await Notification.find();
+        return res.status(200).json(notifications);
+    } catch (e){
+        res.status(500).json(e);
+    }
+
+})
+
+app.get("/notifications/:token" , async (req,res) => {
+
+    try{
+        const token = req.params.token;
+        const notifications = await Notification.find({token: token});
+        return res.status(200).json(notifications);
+    } catch (e){
+        res.status(500).json(e);
+    }
+
 })
 
 app.listen(PORT, () => console.log(`server started ${PORT}`))
