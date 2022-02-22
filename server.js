@@ -23,15 +23,6 @@ mongoose.connect(
 
 var fcm = new FCM(serverKey);
 app.use(cors());
-app.post("/", function(req, res){
-    console.log(req.body)
-    res.send("Post")
-})
-
-app.post('/login', (req, res)=>{
-    console.log("123456");
-    console.log(req.body);
-});
 
 app.post("/notifications" , async (req,res) => {
 
@@ -93,12 +84,28 @@ app.get("/notifications/:token" , async (req,res) => {
 
     try{
         const token = req.params.token;
-        const notifications = await Notification.find({token: token});
+        const notifications = await Notification.find({token: token, state: true});
         return res.status(200).json(notifications);
     } catch (e){
         res.status(500).json(e);
     }
-
 })
+
+app.get("/notifications/deleteNotifications/:id" , async (req,res) => {
+    
+    try{
+        await Notification.findOneAndUpdate(
+            { _id: id },
+            {
+                state: false,
+            },
+        );
+
+        return res.status(200).json({success: false});
+    } catch (e){
+        res.status(500).json({success: false});
+    }
+})
+
 
 app.listen(PORT, () => console.log(`server started ${PORT}`))
