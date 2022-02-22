@@ -53,29 +53,33 @@ app.post("/notifications" , async (req,res) => {
         
         fcm.send(message, function (err, response) {
             if (err) {
+                res.status(500).json({success: false});
                 console.log("Something has gone wrong!")
             } else {
+                res.status(200).json({success: true});
+
                 console.log("Successfully sent with response: ", response)
+                const add_notification = new Notification({ 
+                    token: req.body.token,
+                    title: req.body.title,
+                    content:  req.body.body
+                })
+            
+                const saveNotification = add_notification.save();
+                res.status(200).json({success: true});
             }
         })
         
     
-        const add_notification = new Notification({ 
-            token: req.body.token,
-            title: req.body.title,
-            content:  req.body.body
-        })
-    
-        const saveNotification = await add_notification.save();
-        res.send("Send Notifications successfully!!");
+        
     } catch (e){
-        res.send(e);
+        res.status(500).json({success: false});
     }
 
 })
 
 app.get("/notifications" , async (req,res) => {
-
+    console.log("Get")
     try{
         const notifications = await Notification.find();
         return res.status(200).json(notifications);
