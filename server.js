@@ -47,7 +47,6 @@ app.post("/notifications" , async (req,res) => {
                 res.status(500).json({success: false});
                 console.log("Something has gone wrong!")
             } else {
-                res.status(200).json({success: true});
 
                 console.log("Successfully sent with response: ", response)
                 const add_notification = new Notification({ 
