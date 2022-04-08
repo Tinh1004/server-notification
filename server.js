@@ -22,10 +22,6 @@ mongoose.connect(
   .then((result) => console.log("Connection"))
   .catch((error) => console.log('Error'));
 
-setInterval(()=>{
-    console.log("123");
-},1000)
-
 var fcm = new FCM(serverKey);
 app.use(cors());
 
