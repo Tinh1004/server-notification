@@ -12,6 +12,8 @@ const Notification = require('./models/Notification')
 
 const mongoose = require('mongoose');
 
+
+
 MONGODB_URL= 'mongodb+srv://learnnodejs:learnnodejslearnnodejslearnnodejs@cluster0.wdwpr.mongodb.net/notification_flutter?retryWrites=true&w=majority';
 mongoose.connect(
     MONGODB_URL, 
@@ -20,6 +22,9 @@ mongoose.connect(
   .then((result) => console.log("Connection"))
   .catch((error) => console.log('Error'));
 
+setInterval(()=>{
+    console.log("123");
+},1000)
 
 var fcm = new FCM(serverKey);
 app.use(cors());
